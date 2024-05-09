@@ -9,10 +9,10 @@ let connections = {};
 
 server.on('connection', (ws, req) => {
   const params = new url.URL(req.url, `http://localhost:${port}`).searchParams;
-  const userID = params.get('userID');
-  console.log(`User ${userID} connected`);
-
+  const userID = params.get('userId');
+      console.log(`User ${userID} connected`);
   if (userID) {
+    console.log(`User ${userID} connected`);
     connections[userID] = ws;
     console.log(`User ${userID} is now connected`);
     ws.on('message', (message) => {
@@ -21,12 +21,13 @@ server.on('connection', (ws, req) => {
       
         if (data.isKeyLate) {
           // If the key is late, send a message back to the client
+          console.log(`Key is late for user ${userID}`);
           ws.send(JSON.stringify({ message: 'Key is late', sender: userID }));
         } else {
           const recipientID = data.recipient;
       
           if (connections[recipientID]) {
-            connections[recipientID].send(JSON.stringify({ message: data.content, sender: userID }));
+            connections[recipientID].send(JSON.stringify({ content: data.content, sender: userID , recipient: recipientID}));
           } else {
             // Handle recipient not found scenario (e.g., send error message)
             ws.send(JSON.stringify({ error: 'Recipient not found' }));
